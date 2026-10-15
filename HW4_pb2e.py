@@ -15,7 +15,7 @@ def system(t,q): #our system of equations
 #our constants which are set arbitrarily atm 
 a=1
 b=1/2
-e=2*a*b**(3/2)-.01
+e=2*a*b**(3/2)-.1
 
 #initial starting vector aat our eq point
 
