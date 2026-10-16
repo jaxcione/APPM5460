@@ -33,3 +33,15 @@ plt.xlabel('t')
 plt.legend()
 plt.grid()
 plt.show()
+
+#plot for 3d
+#fig = plt.figure()
+# ax = fig.add_subplot(111, projection='3d')
+
+# ax.plot(sol.y[0], sol.y[1], sol.y[2])
+
+# ax.set_xlabel('x(t)')
+# ax.set_ylabel('y(t)')
+# ax.set_zlabel('z(t)')
+
+# plt.show()
