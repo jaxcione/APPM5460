@@ -18,7 +18,7 @@ def system(t,v):
 def P(a,x):
     return np.polyval(a,x)
 
-def P_prime(x, a):
+def Poly_prime(a,x):
   return np.polyval(np.polyder(a), x)
 
 
@@ -28,22 +28,19 @@ def Q(a,x):
 def res(a,x_data,y_data):
     return P(a,x_data)-y_data
 
-
-def P_k(a,x,k):
+def Q_k(b, x, k):
     val=x
     for i in range(k):
-        val=P(a,val)
+        val = Q(b,val)
     return val
 
-def P_k_prime(a,x,k):
+def Q_k_prime(b, x, k):
     val=x
+    deriv=1
     for j in range(k):
-        deriv*=P_prime(val,a)
-        val=P(a,val)
-        
-    return val 
-
-
+        deriv*=Poly_prime(b, val) 
+        val=Q(b, val)
+    return deriv
 
 
 
@@ -97,9 +94,21 @@ b_fitted=result_Q.x
 P_fit=P(a_fitted,X)
 Q_fit=Q(b_fitted,X)
 
+z_fill=[]
+x_fill=[]
 for j in range(1,4):
-    P1_newton = newton(lambda x: P_k(a_fitted, x)-x, -1, fprime=lambda x: P_k_prime(x, a_fitted))
-    print("Root of P(x) using Newton's method:",P1_newton)
+    P1_newton = newton(lambda x: Q_k(b_fitted, x,j)-x, -2, fprime=lambda x: Q_k_prime(b_fitted,x,j)-1)
+    z_fill.append(P(a_fitted,P1_newton))
+    x_fill.append(P1_newton)
+    print(f"Periodic orbit of period {j}: x={P1_newton}, z={P(a_fitted,P1_newton)}")
+
+z_fill=np.array(z_fill)
+x_fill=np.array(x_fill)
+y_fill=np.zeros_like(x_fill)
+
+
+
+
 
 ax.plot3D(x_t,y_t,z_t,color='purple',lw=.8,alpha=.7)
 ax.scatter3D(x_points,y_points,z_points,color='red',s=8,depthshade=False,label='Plane Intersections')
@@ -128,4 +137,26 @@ plt.ylabel(r'$x_{n+1}$',fontsize=12)
 plt.title(r'Poincaré Map: $(x_{n},x_{n+1})$')
 plt.legend()
 plt.grid(True,linestyle='--',alpha=0.5)
+plt.show()
+
+
+plt.figure(figsize=(6,5))
+plt.scatter(x_points[20:-1],x_points[21:],color='blue',s=8,alpha=0.5)
+plt.plot(X,Q_fit,label="Q(x)",linestyle="--",linewidth=2,color='red')
+plt.xlabel(r'$x_n$',fontsize=12)
+plt.ylabel(r'$x_{n+1}$',fontsize=12)
+plt.title(r'Poincaré Map: $(x_{n},x_{n+1})$')
+plt.legend()
+plt.grid(True,linestyle='--',alpha=0.5)
+plt.show()
+
+
+fig2=plt.figure()
+ax2 = fig2.add_subplot(projection='3d')
+ax2.plot3D(x_t,y_t,z_t,color='blue',lw=.8,alpha=.7)
+ax2.plot3D(x_fill,y_fill,z_fill,'ro',label='Periodic Orbits')
+ax2.set_xlabel('X')
+ax2.set_ylabel('Y')
+ax2.set_zlabel('Z')
+plt.title('Periodic orbits')
 plt.show()
