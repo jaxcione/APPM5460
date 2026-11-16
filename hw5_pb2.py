@@ -43,9 +43,6 @@ def Q_k_prime(b, x, k):
     return deriv
 
 
-
-
-
 t_span=(0,1500)
 t_eval=np.linspace(0,1500,20000)
 x0=[0,-1,0]
@@ -79,8 +76,8 @@ x_points=np.array(x_vals)
 z_points=np.array(z_vals)
 y_points=np.zeros_like(x_points)
 
-degree_poly_P=2
-degree_poly_Q=4
+degree_poly_P=10
+degree_poly_Q=10
 a_vals=np.zeros(degree_poly_P+1)
 b_vals=np.zeros(degree_poly_Q+1)
 X=np.linspace(-9,-2,1000)
@@ -96,17 +93,25 @@ Q_fit=Q(b_fitted,X)
 
 z_fill=[]
 x_fill=[]
+
+x_min=x_points[20:0].min()
+x_max=x_points[20:0].max()
+starting_points=[]
+
 for j in range(1,4):
-    P1_newton = newton(lambda x: Q_k(b_fitted, x,j)-x, -2, fprime=lambda x: Q_k_prime(b_fitted,x,j)-1)
-    z_fill.append(P(a_fitted,P1_newton))
-    x_fill.append(P1_newton)
-    print(f"Periodic orbit of period {j}: x={P1_newton}, z={P(a_fitted,P1_newton)}")
+    for x_start in np.linspace(x_min,x_max,50): #adding more starting poitns for newton since it is so dependent on x0
+        P1_newton = newton(lambda x: Q_k(b_fitted, x,j)-x, x_start, fprime=lambda x: Q_k_prime(b_fitted,x,j)-1)
+        if(x_min<=P1_newton<=x_max and abs(Q_k(b_fitted,P1_newton,j)-P1_newton)<1E-7 and all(abs(Q_k(b_fitted,P1_newton,s)-P1_newton)>1E-6 for s in range(1,j)) and all(abs(P1_newton-t) for t in x_fill)):
+            starting_points.append((j,P1_newton))
+            for i in range(j):
+                x_crit=Q_k(b_fitted,P1_newton,i)
+                z_fill.append(P(a_fitted,P1_newton,i))
+                x_fill.append(x_crit)
+                print(f"Periodic orbit of period {j}: x={P1_newton}, z={P(a_fitted,P1_newton)}")
 
 z_fill=np.array(z_fill)
 x_fill=np.array(x_fill)
 y_fill=np.zeros_like(x_fill)
-
-
 
 
 
@@ -116,7 +121,7 @@ ax.scatter3D(x_points,y_points,z_points,color='red',s=8,depthshade=False,label='
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
-plt.title('Rössler Attractor')
+plt.title('Rossler Attractor')
 plt.show()
 
 plt.figure(figsize=(6,5))
@@ -124,7 +129,7 @@ plt.scatter(x_points[20:],z_points[20:],color='blue',s=8,alpha=0.7)
 plt.plot(X,P_fit,label="P(x)",linestyle="--",linewidth=2,color='red')
 plt.xlabel(r'$x_n$',fontsize=12)
 plt.ylabel(r'$z_n$',fontsize=12)
-plt.title(r'Poincaré Section $(x, z)$ ')
+plt.title(r'Poincare Section $(x, z)$ ')
 plt.grid(True,linestyle='--',alpha=0.5)
 plt.legend()
 plt.show()
@@ -134,7 +139,7 @@ plt.scatter(x_points[20:-1],x_points[21:],color='blue',s=8,alpha=0.5)
 plt.plot(X,Q_fit,label="Q(x)",linestyle="--",linewidth=2,color='red')
 plt.xlabel(r'$x_n$',fontsize=12)
 plt.ylabel(r'$x_{n+1}$',fontsize=12)
-plt.title(r'Poincaré Map: $(x_{n},x_{n+1})$')
+plt.title(r'Poincare Map: $(x_{n},x_{n+1})$')
 plt.legend()
 plt.grid(True,linestyle='--',alpha=0.5)
 plt.show()
@@ -145,7 +150,7 @@ plt.scatter(x_points[20:-1],x_points[21:],color='blue',s=8,alpha=0.5)
 plt.plot(X,Q_fit,label="Q(x)",linestyle="--",linewidth=2,color='red')
 plt.xlabel(r'$x_n$',fontsize=12)
 plt.ylabel(r'$x_{n+1}$',fontsize=12)
-plt.title(r'Poincaré Map: $(x_{n},x_{n+1})$')
+plt.title(r'Poincare Map: $(x_{n},x_{n+1})$')
 plt.legend()
 plt.grid(True,linestyle='--',alpha=0.5)
 plt.show()
