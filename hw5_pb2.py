@@ -160,6 +160,11 @@ fig2=plt.figure()
 ax2 = fig2.add_subplot(projection='3d')
 ax2.plot3D(x_t,y_t,z_t,color='blue',lw=.8,alpha=.7)
 ax2.plot3D(x_fill,y_fill,z_fill,'ro',label='Periodic Orbits')
+for k,x_crit in starting_points:
+    time=6*k #6 is close to the rossler period
+    sol2=solve_ivp(system(0,time), [x_crit,0,P(a_fitted,x_crit)],t_eval=np.linspace(0,time,3000))
+    ax2.plot3D(sol2.y[0],sol2.y[1],sol.y[2],lw=1,label=f"period {j}")
+ax2.legend()
 ax2.set_xlabel('X')
 ax2.set_ylabel('Y')
 ax2.set_zlabel('Z')
