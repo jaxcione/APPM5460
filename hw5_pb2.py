@@ -94,20 +94,21 @@ Q_fit=Q(b_fitted,X)
 z_fill=[]
 x_fill=[]
 
-x_min=x_points[20:0].min()
-x_max=x_points[20:0].max()
+x_min=x_points[20:].min()
+x_max=x_points[20:].max()
 starting_points=[]
 
 for j in range(1,4):
     for x_start in np.linspace(x_min,x_max,50): #adding more starting poitns for newton since it is so dependent on x0
-        P1_newton = newton(lambda x: Q_k(b_fitted, x,j)-x, x_start, fprime=lambda x: Q_k_prime(b_fitted,x,j)-1)
-        if(x_min<=P1_newton<=x_max and abs(Q_k(b_fitted,P1_newton,j)-P1_newton)<1E-7 and all(abs(Q_k(b_fitted,P1_newton,s)-P1_newton)>1E-6 for s in range(1,j)) and all(abs(P1_newton-t) for t in x_fill)):
+        P1_newton = newton(lambda x: Q_k(b_fitted, x,j)-x, x_start, fprime=lambda x: Q_k_prime(b_fitted,x,j)-1,disp=False)
+        if(x_min<=P1_newton<=x_max and abs(Q_k(b_fitted,P1_newton,j)-P1_newton)<1E-7 and all(abs(Q_k(b_fitted,P1_newton,s)-P1_newton)>1E-6 for s in range(1,j)) and all(abs(P1_newton-t)>1E-6 for t in x_fill)):
             starting_points.append((j,P1_newton))
             for i in range(j):
                 x_crit=Q_k(b_fitted,P1_newton,i)
-                z_fill.append(P(a_fitted,P1_newton,i))
+                z_fill.append(P(a_fitted,P1_newton))
                 x_fill.append(x_crit)
                 print(f"Periodic orbit of period {j}: x={P1_newton}, z={P(a_fitted,P1_newton)}")
+    print("-"*50)
 
 z_fill=np.array(z_fill)
 x_fill=np.array(x_fill)
@@ -159,12 +160,12 @@ plt.show()
 fig2=plt.figure()
 ax2 = fig2.add_subplot(projection='3d')
 ax2.plot3D(x_t,y_t,z_t,color='blue',lw=.8,alpha=.7)
-ax2.plot3D(x_fill,y_fill,z_fill,'ro',label='Periodic Orbits')
 for k,x_crit in starting_points:
     time=6*k #6 is close to the rossler period
-    sol2=solve_ivp(system(0,time), [x_crit,0,P(a_fitted,x_crit)],t_eval=np.linspace(0,time,3000))
-    ax2.plot3D(sol2.y[0],sol2.y[1],sol.y[2],lw=1,label=f"period {j}")
-ax2.legend()
+    sol2=solve_ivp(system,(0,time), [x_crit,0,P(a_fitted,x_crit)],t_eval=np.linspace(0,time,600))
+    ax2.plot3D(sol2.y[0],sol2.y[1],sol2.y[2],lw=2,label=f"period {k}")
+
+ax2.legend(loc='upper left',bbox_to_anchor=(1.05, 1))
 ax2.set_xlabel('X')
 ax2.set_ylabel('Y')
 ax2.set_zlabel('Z')
