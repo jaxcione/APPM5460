@@ -20,41 +20,35 @@ def Jacobian(w):
     return A
 
 
+def repack(t,s):
+    x=s[:3]
+    Q=s[3:].reshape(3,3)
 
+    return np.concatenate([system(t,x),(Jacobian(x)@Q).ravel()]) #.ravel flattens an array
+
+    
 def Ly_spectrum(x0,N,discard):
     
     Q0=np.eye(3)
     u=np.zeros(3)
     
-    for _ in range(discard):
-        J0=Jacobian(x0)
-        Zk=J0@Q0 
-        z1=Zk[:,0]
-        z2=Zk[:,1]
-        z3=Zk[:,2]
+    for j in range(discard+N):
+        s0=np.concatenate([x0,Q0.ravel()]) #conjoinging xo Q0
 
-        r11=np.linalg.norm(z1)
-        q1=z1/r11
+        sol=solve_ivp(repack,(0,1),s0,rtol=1e-9,atol=1e-12,method='DOP853').y[:,-1] #solving Q'=JQ
+        x0=sol[:3] #new point
+        Zk=sol[3:].reshape(3,3)
 
-        r12=np.dot(q1,z2)
+        Q0,R=np.linalg.qr(Zk)
 
-        w=z2-r12*q1
-        r22=np.linalg.norm(w)
-        q2=w/r22
+        if j>=discard: #only add after transient term
+            u+=np.log(np.abs(np.diag(R)))
 
-        r13=np.dot(q1,z3)
-        r23=np.dot(q2,z3)
+    return u/(N)
 
-        w2=z3-r13*q1-r23*q2
-        r33=np.linalg.norm(w2)
-        q3=w2/r33
+x0=[1,1,1]
 
-        
-        Q0=np.column_stack([q1,q2,q3])
-        u+=np.log([r11,r22,r33])
-
-    return u/N
-        
+print(Ly_spectrum(x0,6000,600))
 
 
 
