@@ -22,7 +22,7 @@ def iteration(x_init,N):
     return xn,yn
 
 
-def box(x,y,dimension):
+def box(x,y):
     x_min=np.min(x)
     y_min=np.min(y)
 
@@ -38,7 +38,7 @@ def box(x,y,dimension):
 
     normalized=(points-min_val)/square #normalizes into [0,1]x[0,1]
 
-    bins=np.array([100,500]) #constructing 100 and 500 bins
+    bins=np.array([9000]) #constructing grid
 
     eps=1/bins #side length of a grid box
     counter=[]
@@ -53,10 +53,10 @@ def box(x,y,dimension):
 
 
 start=np.array([.7,.4])
-N=int(1E6)
+N=int(1E7)
 X,Y=iteration(start,N)
 
-print(box(X,Y,2))
+print(box(X,Y))
 
 # X=X[50:]
 # Y=Y[50:]
